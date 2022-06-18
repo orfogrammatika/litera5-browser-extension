@@ -2,19 +2,67 @@
 
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <link rel="stylesheet" href="styles/options.css">
+    <title>Расширение Литера5 - настройки</title>
+    <!--suppress HtmlUnknownTarget -->
+    <link rel="stylesheet" href="styles/options.css">
 </head>
 
 <body>
-  <div class="container">
-    <h1>Options page</h1>
-    
-    <p>Edit <u>static/options.html</u> to change this page!</p>
-  </div>
-  
-  <script src="options.js"></script>
+<div class="container">
+    <h1>Настройки Литера5</h1>
+
+    <div id="autoconfigure" class="hidden">
+        <div>Сайт <span id="autoconfigure__origin"></span> предлагает установить следующие настройки плагина:</div>
+        <table>
+            <tr>
+                <td>Сервер Литеры:</td>
+                <th id="autoconfigure__server"></th>
+            </tr>
+            <tr>
+                <td>Сервер Литеры:</td>
+                <th id="autoconfigure__login"></th>
+            </tr>
+            <tr>
+                <td>Сервер Литеры:</td>
+                <th id="autoconfigure__password"></th>
+            </tr>
+        </table>
+        <div>
+            <button id="autoconfigure__apply">Да, применить настройки</button>
+            <button id="autoconfigure__cancel">Отказать</button>
+        </div>
+    </div>
+
+    <div id="message" class="hidden">Настройки успешно установлены.</div>
+
+    <form>
+        <div class="input">
+            <label class="input__label" for="input-server">Сервер Литеры:</label>
+            <input id="input-server" class="input__control" type="url" name="server" />
+            <div class="input__help">
+                Здесь нужно указать адрес сервера Литеры с которым вы собираетесь работать. Укажите основной адрес <code>https://litera5.ru</code>, если вы работаете с облачной Литерой или адрес вашей корпоративной Литеры.
+            </div>
+        </div>
+        <div class="input">
+            <label class="input__label" for="input-login">Имя для входа:</label>
+            <input id="input-login" class="input__control" type="text" name="login" />
+            <div class="input__help">Здесь указывается ваше имя для входа в формате <code>login@company</code>.</div>
+        </div>
+        <div class="input">
+            <label class="input__label" for="input-password">Пароль:</label>
+            <input id="input-password" class="input__control" type="password" name="password" />
+            <div class="input__help">Специальный пароль пользователя для работы с API</div>
+        </div>
+        <div class="controls">
+            <button id="btn-save" class="btn" type="button">Запомнить настройки</button>
+        </div>
+    </form>
+</div>
+
+<!--suppress HtmlUnknownTarget -->
+<script src="options.js"></script>
 </body>
 </html>

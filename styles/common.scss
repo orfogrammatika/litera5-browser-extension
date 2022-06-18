@@ -15,3 +15,22 @@ body {
 
   align-items: center;
 }
+
+.input {
+  display: flex;
+  flex-direction: column;
+  margin: 8px 0;
+  max-width: 350px;
+}
+
+.input__label {
+  margin-bottom: 4px;
+}
+
+.input__control {
+
+}
+
+.hidden {
+  display: none;
+}

@@ -1,5 +1,18 @@
+export interface Config {
+	server: string;
+	login: string;
+	password: string;
+}
+
+export interface AutoConfig extends Config {
+	origin: string;
+}
+
 // Define your storage data here
-export interface Storage {} // eslint-disable-line
+export interface Storage {
+	config: Config;
+	autoconfig?: AutoConfig;
+}
 
 export function getStorageData(): Promise<Storage> {
 	return new Promise((resolve, reject) => {

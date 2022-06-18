@@ -8,11 +8,26 @@
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["contentScript.js"]
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "contentSpellcheck.js"
+      ]
+    },
+    {
+      "matches": [
+        "*://*/cabinet/api/",
+        "*://*/*/cabinet/api/"
+      ],
+      "js": [
+        "contentAutoconfig.js"
+      ]
     }
   ],
-  "permissions": ["storage", "scripting"],
+  "permissions": [
+    "storage"
+  ],
   "options_ui": {
     "page": "options.html",
     "open_in_tab": true
@@ -34,6 +49,8 @@
     "128": "/icon/icon128.png"
   },
   "externally_connectable": {
-    "matches": ["https://litera5.ru/*"]
+    "matches": [
+      "https://litera5.ru/*"
+    ]
   }
 }
