@@ -1,7 +1,7 @@
 {
   "name": "Litera5",
   "description": "Возможность проверять текст в любом редакторе текста!",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "manifest_version": 3,
   "background": {
     "service_worker": "serviceWorker.js"

@@ -44,18 +44,20 @@ function _mkIFrameUrl(server: string, url: string): string {
 
 class L5ButtonHandler {
 	$element: HTMLElement;
-	$btn: HTMLElement;
-	$div: HTMLElement;
+	$btn?: HTMLElement;
+	$div?: HTMLElement;
 	count: number;
 
 	setButtonClass = () => {
-		if (this.count > 0) {
-			const r = this.$element.getBoundingClientRect();
-			this.$btn.style.left = `${window.scrollX + r.right - 36}px`;
-			this.$btn.style.top = `${window.scrollY + r.bottom - 36}px`;
-			this.$btn.classList.remove('hidden');
-		} else {
-			this.$btn.classList.add('hidden');
+		if (this.$btn) {
+			if (this.count > 0) {
+				const r = this.$element.getBoundingClientRect();
+				this.$btn.style.left = `${window.scrollX + r.right - 36}px`;
+				this.$btn.style.top = `${window.scrollY + r.bottom - 36}px`;
+				this.$btn.classList.remove('hidden');
+			} else {
+				this.$btn.classList.add('hidden');
+			}
 		}
 	};
 
@@ -86,9 +88,7 @@ class L5ButtonHandler {
 
 	closeEditor = () => {
 		log.debug('closeEditor');
-		if (this.$div) {
-			this.$div.remove();
-		}
+		this.$div?.remove();
 		window.removeEventListener('message', this.onMessage);
 	};
 
@@ -103,8 +103,15 @@ class L5ButtonHandler {
 		const $div = document.createElement('div');
 		$div.classList.add('l5-plugin-editor');
 		const $iframe = document.createElement('iframe');
+		$iframe.classList.add('l5-plugin-editor__iframe');
+		const $btn = document.createElement('button');
+		$btn.classList.add('l5-plugin-editor__close-button');
+		$btn.addEventListener('click', this.closeEditor);
+		$btn.innerText = '✕';
+		$btn.title = 'Закрыть редактор Литеры';
 		$iframe.src = url;
 		$div.appendChild($iframe);
+		$div.appendChild($btn);
 		document.body.appendChild($div);
 		this.$div = $div;
 	};

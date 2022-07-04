@@ -1,6 +1,6 @@
 {
   "name": "litera5-browser-plugin",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Плагин для браузера системы корпоративной проверки правописания Литера5",
   "scripts": {
     "start": "webpack --watch --config webpack.dev.js",
