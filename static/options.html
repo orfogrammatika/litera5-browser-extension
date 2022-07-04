@@ -12,38 +12,41 @@
 
 <body>
 <div class="container">
-    <h1>Настройки Литера5</h1>
+    <h1>Настройки расширения Литера5</h1>
 
-    <div id="autoconfigure" class="hidden">
-        <div>Сайт <span id="autoconfigure__origin"></span> предлагает установить следующие настройки плагина:</div>
-        <table>
+    <div id="autoconfigure" class="hidden alert alert--info">
+        <p>Сайт <strong id="autoconfigure__origin" class="text-white">www.ru</strong> предлагает установить следующие
+            настройки плагина:</p>
+        <table class="table">
             <tr>
                 <td>Сервер Литеры:</td>
-                <th id="autoconfigure__server"></th>
+                <th id="autoconfigure__server" class="text-white"></th>
             </tr>
             <tr>
-                <td>Сервер Литеры:</td>
-                <th id="autoconfigure__login"></th>
+                <td>Имя для входа:</td>
+                <th id="autoconfigure__login" class="text-white"></th>
             </tr>
             <tr>
-                <td>Сервер Литеры:</td>
-                <th id="autoconfigure__password"></th>
+                <td>Пароль:</td>
+                <th id="autoconfigure__password" class="text-white"></th>
             </tr>
         </table>
-        <div>
-            <button id="autoconfigure__apply">Да, применить настройки</button>
-            <button id="autoconfigure__cancel">Отказать</button>
+        <div class="controls">
+            <button id="autoconfigure__apply" class="btn">Да, применить настройки</button>
+            <button id="autoconfigure__cancel" class="btn">Отказать</button>
         </div>
     </div>
 
-    <div id="message" class="hidden">Настройки успешно установлены.</div>
+    <div id="message" class="hidden alert alert--success">Настройки успешно установлены.</div>
 
     <form>
         <div class="input">
             <label class="input__label" for="input-server">Сервер Литеры:</label>
             <input id="input-server" class="input__control" type="url" name="server" />
             <div class="input__help">
-                Здесь нужно указать адрес сервера Литеры с которым вы собираетесь работать. Укажите основной адрес <code>https://litera5.ru</code>, если вы работаете с облачной Литерой или адрес вашей корпоративной Литеры.
+                Здесь нужно указать адрес сервера Литеры с которым вы собираетесь работать. Укажите основной адрес
+                <code>https://litera5.ru</code>, если вы работаете с облачной Литерой или адрес вашей корпоративной
+                Литеры.
             </div>
         </div>
         <div class="input">

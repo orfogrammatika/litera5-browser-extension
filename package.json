@@ -38,6 +38,7 @@
   ],
   "devDependencies": {
     "@babel/core": "^7.16.5",
+    "@babel/plugin-transform-modules-commonjs": "^7.18.2",
     "@babel/plugin-transform-runtime": "^7.16.5",
     "@babel/preset-env": "^7.16.5",
     "@babel/preset-typescript": "^7.16.5",
@@ -69,6 +70,7 @@
   "dependencies": {
     "@babel/runtime": "^7.16.5",
     "js-logger": "^1.6.1",
+    "litera5-api-js-client": "orfogrammatika/litera5-api-js-client",
     "lodash": "^4.17.21",
     "normalize.css": "^8.0.1"
   },

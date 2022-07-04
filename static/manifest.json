@@ -13,6 +13,9 @@
       ],
       "js": [
         "contentSpellcheck.js"
+      ],
+      "css": [
+        "styles/contentSpellcheck.css"
       ]
     },
     {
