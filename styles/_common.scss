@@ -7,6 +7,10 @@ body {
   font-size: 18px;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 .input {
   display: flex;
   flex-direction: column;
@@ -88,4 +92,8 @@ body {
     color: aquamarine;
   }
 
+}
+
+.full-width {
+  width: 100%;
 }

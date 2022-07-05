@@ -37,7 +37,22 @@
         </div>
     </div>
 
-    <div id="message" class="hidden alert alert--success">Настройки успешно установлены.</div>
+    <div id="status" class="hidden">
+        <div id="status__configured" class="hidden alert alert--success">Плагин настроен и готов к работе.</div>
+        <div id="status__misconfigured" class="hidden alert alert--warning">
+            Плагин не настроен или параметры не прошли проверку. Пожалуйста, убедитесь, что вы всё правильно заполнили,
+            что сервер Литеры по указанному адресу существует и работает, и нажмите кнопку "Запомнить настройки".
+        </div>
+    </div>
+
+    <div id="message">
+        <div id="message__success" class="hidden alert alert--success">Настройки успешно установлены.</div>
+        <div id="message__fail" class="hidden alert alert--warning">Настройки не установлены. Не удалось проверить
+            правильность настроек. Пожалуйста, проверьте корректность заполнения полей и наличие связи с сервером
+            Литеры.
+        </div>
+        <div id="message__progress" class="hidden alert alert--info">Настройки проверяются...</div>
+    </div>
 
     <form>
         <div class="input">

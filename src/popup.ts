@@ -11,15 +11,15 @@ async function setup() {
 		misconfigured: document.getElementById('misconfigured'),
 	};
 
-	$.options.addEventListener('click', () => {
+	$.options?.addEventListener('click', () => {
 		chrome.runtime.openOptionsPage();
 	});
 
 	const cfg = await getConfig();
 	if (isConfigured(cfg)) {
-		$.configured.classList.remove('hidden');
+		$.configured?.classList.remove('hidden');
 	} else {
-		$.misconfigured.classList.remove('hidden');
+		$.misconfigured?.classList.remove('hidden');
 	}
 }
 

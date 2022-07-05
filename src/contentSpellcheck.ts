@@ -1,10 +1,12 @@
-import { getConfig } from './lib/Config';
+import { parseCompany, parseLogin } from './lib/api';
+import { getConfig, isConfigured } from './lib/Config';
 import { findEditors, getEditorContent, setEditorContent } from './lib/editor';
 import { Logger } from './lib/logger';
-import { findIndex } from 'lodash';
+import { findIndex, isNil } from 'lodash';
 import { createApi } from 'litera5-api-js-client';
 
 import '../styles/contentSpellcheck.scss';
+import { Config } from './lib/storage';
 import { Svg } from './svg';
 
 const log = Logger.get('L5 Spellcheck');
@@ -16,24 +18,6 @@ interface EditorSaveDetail {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	metaCustom?: any[];
 	html: string;
-}
-
-function _company(login: string): string {
-	const parts = login.split('@');
-	if (parts.length === 2) {
-		return parts[1];
-	} else {
-		return '';
-	}
-}
-
-function _login(login: string): string {
-	const parts = login.split('@');
-	if (parts.length === 2) {
-		return parts[0];
-	} else {
-		return '';
-	}
 }
 
 function _mkIFrameUrl(server: string, url: string): string {
@@ -120,18 +104,49 @@ class L5ButtonHandler {
 		const html = getEditorContent(this.$element);
 		log.debug('check html:', html);
 		const cfg = await getConfig();
-		const api = createApi({
-			company: _company(cfg.login),
-			userApiPassword: cfg.password,
-			url: cfg.server,
-		});
-		const resp = await api.userCheck({
-			login: _login(cfg.login),
-			token: '',
-			html: html,
-		});
-		window.addEventListener('message', this.onMessage);
-		this.showEditor(_mkIFrameUrl(cfg.server, resp.url));
+		if (isConfigured(cfg)) {
+			const api = createApi({
+				company: parseCompany(cfg.login),
+				userApiPassword: cfg.password,
+				url: cfg.server,
+			});
+			const resp = await api
+				.userCheck({
+					login: parseLogin(cfg.login),
+					token: '',
+					html: html,
+				})
+				.catch(err => {
+					log.error('Ошибка API', err);
+					if (401 === err.status) {
+						chrome.runtime.sendMessage({
+							kind: 'misconfigure',
+						});
+						setTimeout(deinstrumentEditors, 1000);
+						window.alert(
+							'Не удалось проверить текст. Похоже, что изменились параметры входа в Литеру, например, специальный пароль. Пожалуйста, проверьте настройки плагина.'
+						);
+					} else {
+						const text = err.text();
+						if (!isNil(text)) {
+							window.alert(
+								`Во время проверки произошла непредвиденная ошибка: "${text}". Пожалуйста убедитесь, что сервер Литеры работает, плагин настроен правильно и у вас есть все необходимые права на работу с Литерой.`
+							);
+						} else {
+							window.alert(
+								'Во время проверки произошла непредвиденная ошибка. Пожалуйста убедитесь, что сервер Литеры работает, плагин настроен правильно и у вас есть все необходимые права на работу с Литерой.'
+							);
+						}
+					}
+					return {
+						url: undefined,
+					};
+				});
+			if (!isNil(resp.url)) {
+				window.addEventListener('message', this.onMessage);
+				this.showEditor(_mkIFrameUrl(cfg.server, resp.url));
+			}
+		}
 	};
 
 	createButton = () => {
@@ -146,6 +161,18 @@ class L5ButtonHandler {
 		document.body.appendChild(this.$btn);
 	};
 
+	removeButton = () => {
+		if (this.$btn) {
+			this.$btn.removeEventListener('mouseenter', this.showButton);
+			this.$btn.removeEventListener('mouseleave', this.hideButton);
+			this.$btn.removeEventListener('click', this.onClickButton);
+			this.$btn.remove();
+			this.$btn = undefined;
+		}
+		this.$element.removeEventListener('mouseenter', this.showButton);
+		this.$element.removeEventListener('mouseleave', this.hideButton);
+	};
+
 	constructor(e: HTMLElement) {
 		this.$element = e;
 		this.createButton();
@@ -155,7 +182,14 @@ class L5ButtonHandler {
 	}
 }
 
-const editors: L5ButtonHandler[] = [];
+let editors: L5ButtonHandler[] = [];
+
+function deinstrumentEditors() {
+	editors.forEach(editor => {
+		editor.removeButton();
+	});
+	editors = [];
+}
 
 function hasHandlerForElement(element: HTMLElement): boolean {
 	return findIndex(editors, { $element: element }) > -1;
@@ -174,9 +208,18 @@ function instrumentEditor(element: HTMLElement): void {
 	}
 }
 
-function instrumentEditors() {
-	const editors = findEditors();
-	editors.forEach(instrumentEditor);
+function allowCheck(cfg: Config): boolean {
+	const href = window.location.href.toLowerCase();
+	const host = window.location.host;
+	return !(href.startsWith(cfg.server) || host.match(/orfogrammka/) || host.match(/litera5/));
+}
+
+async function instrumentEditors() {
+	const cfg = await getConfig();
+	if (isConfigured(cfg) && allowCheck(cfg)) {
+		const editors = findEditors();
+		editors.forEach(instrumentEditor);
+	}
 }
 
 /**
@@ -192,7 +235,9 @@ async function setup() {
 		subtree: true,
 	});
 
-	instrumentEditors();
+	setInterval(instrumentEditors, 5000);
+
+	await instrumentEditors();
 	log.debug('setup >');
 }
 

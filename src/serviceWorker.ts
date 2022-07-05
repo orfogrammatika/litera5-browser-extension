@@ -1,5 +1,5 @@
-import { setAutoConfig } from './lib/Config';
-import { AutoConfig, initializeStorageWithDefaults } from './lib/storage';
+import { getConfig, setAutoConfig, setConfig } from './lib/Config';
+import { AutoConfig, Config, initializeStorageWithDefaults, State } from './lib/storage';
 import { Logger } from './lib/logger';
 
 const log = Logger.get('L5 ServiceWorker');
@@ -11,6 +11,7 @@ chrome.runtime.onInstalled.addListener(async () => {
 
 	await initializeStorageWithDefaults({
 		config: {
+			state: State.misconfigured,
 			server: 'https://litera5.ru',
 			login: '',
 			password: '',
@@ -27,13 +28,21 @@ chrome.storage.onChanged.addListener(changes => {
 	}
 });
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
 	if (sender.id === chrome.runtime.id) {
+		let cfg: Config | undefined = undefined;
 		switch (request.kind) {
 			case 'setup':
 				setAutoConfig(request.data as AutoConfig).then(() => {
 					chrome.runtime.openOptionsPage();
 					sendResponse(true);
+				});
+				break;
+			case 'misconfigure':
+				cfg = await getConfig();
+				await setConfig({
+					...cfg,
+					state: State.misconfigured,
 				});
 				break;
 			default:

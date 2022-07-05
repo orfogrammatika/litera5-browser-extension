@@ -1,7 +1,13 @@
+export enum State {
+	misconfigured = 'misconfigured',
+	active = 'active',
+}
+
 export interface Config {
 	server: string;
 	login: string;
 	password: string;
+	state: State;
 }
 
 export interface AutoConfig extends Config {

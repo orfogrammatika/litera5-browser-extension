@@ -6,11 +6,12 @@ function onPing() {
 	document.dispatchEvent(new CustomEvent('litera5-plugin-pong'));
 }
 
-function onSetup(event: CustomEvent) {
+function onSetup(event: Event) {
+	const ev = event as CustomEvent;
 	chrome.runtime.sendMessage({
 		kind: 'setup',
 		data: {
-			...event.detail,
+			...ev.detail,
 			origin: window.location.origin,
 		},
 	});

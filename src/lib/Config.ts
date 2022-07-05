@@ -1,5 +1,5 @@
 import { isEmpty } from 'lodash';
-import { AutoConfig, Config, getStorageItem, setStorageItem } from './storage';
+import { AutoConfig, Config, getStorageItem, setStorageItem, State } from './storage';
 
 const key = 'config';
 const autoKey = 'autoconfig';
@@ -13,13 +13,13 @@ export async function setConfig(value: Config) {
 }
 
 export function isConfigured(cfg: Config): boolean {
-	return !(isEmpty(cfg.server) || isEmpty(cfg.login) || isEmpty(cfg.password));
+	return !(isEmpty(cfg.server) || isEmpty(cfg.login) || isEmpty(cfg.password)) && cfg.state === State.active;
 }
 
-export async function getAutoConfig(): Promise<AutoConfig> {
+export async function getAutoConfig(): Promise<AutoConfig | undefined> {
 	return getStorageItem(autoKey);
 }
 
-export async function setAutoConfig(value: AutoConfig) {
+export async function setAutoConfig(value?: AutoConfig) {
 	return setStorageItem(autoKey, value);
 }
