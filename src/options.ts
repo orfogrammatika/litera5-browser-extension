@@ -5,6 +5,7 @@ import { Logger } from './lib/logger';
 import '../styles/options.scss';
 import { getAutoConfig, getConfig, isConfigured, setAutoConfig, setConfig } from './lib/Config';
 import { Config, State } from './lib/storage';
+import { Ui } from './lib/ui';
 
 const log = Logger.get('L5 Options');
 
@@ -40,27 +41,27 @@ async function setup() {
 	};
 
 	function successMessage() {
-		$.message.success?.classList.remove('hidden');
+		Ui.show($.message.success);
 		setTimeout(() => {
-			$.message.success?.classList.add('hidden');
-			$.status.container?.classList.remove('hidden');
+			Ui.hide($.message.success);
+			Ui.show($.status.container);
 		}, 10000);
 	}
 
 	function failMessage() {
-		$.message.fail?.classList.remove('hidden');
+		Ui.show($.message.fail);
 		setTimeout(() => {
-			$.message.fail?.classList.add('hidden');
-			$.status.container?.classList.remove('hidden');
+			Ui.hide($.message.fail);
+			Ui.show($.status.container);
 		}, 10000);
 	}
 
 	function progressMessageShow() {
-		$.message.progress?.classList.remove('hidden');
+		Ui.show($.message.progress);
 	}
 
 	function progressMessageHide() {
-		$.message.progress?.classList.add('hidden');
+		Ui.hide($.message.progress);
 	}
 
 	async function testConfig(cfg: Config): Promise<boolean> {
@@ -94,7 +95,7 @@ async function setup() {
 	}
 
 	async function onSaveClick() {
-		$.status.container?.classList.add('hidden');
+		Ui.hide($.status.container);
 		const newCfg = {
 			state: State.active,
 			server: $.input.server.value,
@@ -109,13 +110,13 @@ async function setup() {
 		$.input.server.value = cfg.server;
 		$.input.login.value = cfg.login;
 		$.input.password.value = cfg.password;
-		$.btn.save.addEventListener('click', onSaveClick);
+		Ui.on($.btn.save).click(onSaveClick);
 		if (isConfigured(cfg)) {
-			$.status.configured?.classList.remove('hidden');
-			$.status.misconfigured?.classList.add('hidden');
+			Ui.show($.status.configured);
+			Ui.hide($.status.misconfigured);
 		} else {
-			$.status.configured?.classList.add('hidden');
-			$.status.misconfigured?.classList.remove('hidden');
+			Ui.hide($.status.configured);
+			Ui.show($.status.misconfigured);
 		}
 	}
 
@@ -124,7 +125,7 @@ async function setup() {
 	const auto = await getAutoConfig();
 
 	async function closeAutoConfig() {
-		$.auto.block?.classList.add('hidden');
+		Ui.hide($.auto.block);
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		await setAutoConfig(null!);
 		await loadConfig();
@@ -132,7 +133,7 @@ async function setup() {
 
 	async function onCancel() {
 		await closeAutoConfig();
-		$.status.container?.classList.remove('hidden');
+		Ui.show($.status.container);
 	}
 
 	async function onApply() {
@@ -143,16 +144,16 @@ async function setup() {
 	}
 
 	if (!isNil(auto)) {
-		if ($.auto.origin) $.auto.origin.innerText = auto.origin;
-		if ($.auto.server) $.auto.server.innerText = auto.server;
-		if ($.auto.login) $.auto.login.innerText = auto.login;
-		if ($.auto.password) $.auto.password.innerText = auto.password;
-		$.auto.block?.classList.remove('hidden');
-		$.status.container?.classList.add('hidden');
-		$.auto.apply?.addEventListener('click', onApply);
-		$.auto.cancel?.addEventListener('click', onCancel);
+		Ui.innerText.set($.auto.origin, auto.origin);
+		Ui.innerText.set($.auto.server, auto.server);
+		Ui.innerText.set($.auto.login, auto.login);
+		Ui.innerText.set($.auto.password, auto.password);
+		Ui.show($.auto.block);
+		Ui.hide($.status.container);
+		Ui.on($.auto.apply).click(onApply);
+		Ui.on($.auto.cancel).click(onCancel);
 	} else {
-		$.status.container?.classList.remove('hidden');
+		Ui.show($.status.container);
 	}
 }
 

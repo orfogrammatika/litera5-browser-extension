@@ -1,12 +1,14 @@
 import { parseCompany, parseLogin } from './lib/api';
 import { getConfig, isConfigured } from './lib/Config';
 import { findEditors, getEditorContent, setEditorContent } from './lib/editor';
+import { Ext, Msg } from './lib/ext';
 import { Logger } from './lib/logger';
-import { findIndex, isNil } from 'lodash';
+import { findIndex, isFunction, isNil } from 'lodash';
 import { createApi } from 'litera5-api-js-client';
 
 import '../styles/contentSpellcheck.scss';
 import { Config } from './lib/storage';
+import { Ui } from './lib/ui';
 import { Svg } from './svg';
 
 const log = Logger.get('L5 Spellcheck');
@@ -36,11 +38,13 @@ class L5ButtonHandler {
 		if (this.$btn) {
 			if (this.count > 0) {
 				const r = this.$element.getBoundingClientRect();
-				this.$btn.style.left = `${window.scrollX + r.right - 36}px`;
-				this.$btn.style.top = `${window.scrollY + r.bottom - 36}px`;
-				this.$btn.classList.remove('hidden');
+				Ui.style.set(this.$btn, {
+					left: `${window.scrollX + r.right - 36}px`,
+					top: `${window.scrollY + r.bottom - 36}px`,
+				});
+				Ui.show(this.$btn);
 			} else {
-				this.$btn.classList.add('hidden');
+				Ui.hide(this.$btn);
 			}
 		}
 	};
@@ -90,7 +94,7 @@ class L5ButtonHandler {
 		$iframe.classList.add('l5-plugin-editor__iframe');
 		const $btn = document.createElement('button');
 		$btn.classList.add('l5-plugin-editor__close-button');
-		$btn.addEventListener('click', this.closeEditor);
+		Ui.on($btn).click(this.closeEditor);
 		$btn.innerText = '✕';
 		$btn.title = 'Закрыть редактор Литеры';
 		$iframe.src = url;
@@ -119,15 +123,15 @@ class L5ButtonHandler {
 				.catch(err => {
 					log.error('Ошибка API', err);
 					if (401 === err.status) {
-						chrome.runtime.sendMessage({
-							kind: 'misconfigure',
+						Ext.sendMessage({
+							kind: Msg.misconfigure,
 						});
 						setTimeout(deinstrumentEditors, 1000);
 						window.alert(
 							'Не удалось проверить текст. Похоже, что изменились параметры входа в Литеру, например, специальный пароль. Пожалуйста, проверьте настройки плагина.'
 						);
 					} else {
-						const text = err.text();
+						const text = isFunction(err.text) ? err.text() : err;
 						if (!isNil(text)) {
 							window.alert(
 								`Во время проверки произошла непредвиденная ошибка: "${text}". Пожалуйста убедитесь, что сервер Литеры работает, плагин настроен правильно и у вас есть все необходимые права на работу с Литерой.`
@@ -152,32 +156,26 @@ class L5ButtonHandler {
 	createButton = () => {
 		this.$btn = document.createElement('div');
 		this.$btn.classList.add('l5-plugin-button');
-		this.$btn.classList.add('hidden');
+		Ui.hide(this.$btn);
 		this.$btn.innerHTML = Svg.logo;
 		this.$btn.title = 'Проверить текст редактора в Литере';
-		this.$btn.addEventListener('mouseenter', this.showButton);
-		this.$btn.addEventListener('mouseleave', this.hideButton);
-		this.$btn.addEventListener('click', this.onClickButton);
+		Ui.on(this.$btn).mouseenter(this.showButton).mouseleave(this.hideButton).click(this.onClickButton);
 		document.body.appendChild(this.$btn);
 	};
 
 	removeButton = () => {
 		if (this.$btn) {
-			this.$btn.removeEventListener('mouseenter', this.showButton);
-			this.$btn.removeEventListener('mouseleave', this.hideButton);
-			this.$btn.removeEventListener('click', this.onClickButton);
+			Ui.off(this.$btn).mouseenter(this.showButton).mouseleave(this.hideButton).click(this.onClickButton);
 			this.$btn.remove();
 			this.$btn = undefined;
 		}
-		this.$element.removeEventListener('mouseenter', this.showButton);
-		this.$element.removeEventListener('mouseleave', this.hideButton);
+		Ui.off(this.$element).mouseenter(this.showButton).mouseleave(this.hideButton);
 	};
 
 	constructor(e: HTMLElement) {
 		this.$element = e;
 		this.createButton();
-		this.$element.addEventListener('mouseenter', this.showButton);
-		this.$element.addEventListener('mouseleave', this.hideButton);
+		Ui.on(this.$element).mouseenter(this.showButton).mouseleave(this.hideButton);
 		this.count = 0;
 	}
 }

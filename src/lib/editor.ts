@@ -54,7 +54,7 @@ export function getEditorContent(element: HTMLElement): string {
 	log.debug('getEditorContent < element=', element);
 	let result = '';
 	if ('textarea' === element.tagName.toLowerCase()) {
-		result = `<p>${(element as HTMLTextAreaElement).value}</p>`;
+		result = `<pre style="white-space: pre-wrap;">${(element as HTMLTextAreaElement).value}</pre>`;
 	} else if ('true' === element.getAttribute('contenteditable')?.toLowerCase()) {
 		result = element.innerHTML;
 	} else if (isEditorContainer(element as HTMLIFrameElement)) {
@@ -72,7 +72,10 @@ export function getEditorContent(element: HTMLElement): string {
 export function setEditorContent(element: HTMLElement, content: string): void {
 	log.debug('setEditorContent < element=', element, 'content=', content);
 	if ('textarea' === element.tagName.toLowerCase()) {
-		(element as HTMLTextAreaElement).value = content.replace(/^<p>/, '').replace(/<\/p>\s*$/, '');
+		(element as HTMLTextAreaElement).value = content
+			.replace(/^<pre style="white-space: pre-wrap;">/, '')
+			.replace(/<\/pre>\s*$/, '')
+			.replace(/<br>/g, '\n');
 	} else if ('true' === element.getAttribute('contenteditable')?.toLowerCase()) {
 		if (isCK5Editor(element)) {
 			setCK5Content(element, content);

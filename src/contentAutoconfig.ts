@@ -1,4 +1,6 @@
+import { Ext, Msg } from './lib/ext';
 import { Logger } from './lib/logger';
+import { Ui } from './lib/ui';
 
 const log = Logger.get('L5 Autoconfig');
 
@@ -8,8 +10,8 @@ function onPing() {
 
 function onSetup(event: Event) {
 	const ev = event as CustomEvent;
-	chrome.runtime.sendMessage({
-		kind: 'setup',
+	Ext.sendMessage({
+		kind: Msg.setup,
 		data: {
 			...ev.detail,
 			origin: window.location.origin,
@@ -17,8 +19,7 @@ function onSetup(event: Event) {
 	});
 }
 
-document.addEventListener('litera5-plugin-ping', onPing);
-document.addEventListener('litera5-plugin-setup', onSetup);
+Ui.on(document).custom('litera5-plugin-ping', onPing).custom('litera5-plugin-setup', onSetup);
 document.dispatchEvent(new CustomEvent('litera5-plugin-pong'));
 
 log.info('Модуль автоматической настройки плагина загружен.');
