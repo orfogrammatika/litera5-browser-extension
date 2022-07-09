@@ -1,3 +1,5 @@
+import browser from 'webextension-polyfill';
+
 export enum State {
 	misconfigured = 'misconfigured',
 	active = 'active',
@@ -21,50 +23,20 @@ export interface Storage {
 }
 
 export function getStorageData(): Promise<Storage> {
-	return new Promise((resolve, reject) => {
-		chrome.storage.sync.get(null, result => {
-			if (chrome.runtime.lastError) {
-				return reject(chrome.runtime.lastError);
-			}
-
-			return resolve(result as Storage);
-		});
-	});
+	return browser.storage.sync.get() as Promise<Storage>;
 }
 
 export function setStorageData(data: Storage): Promise<void> {
-	return new Promise((resolve, reject) => {
-		chrome.storage.sync.set(data, () => {
-			if (chrome.runtime.lastError) {
-				return reject(chrome.runtime.lastError);
-			}
-
-			return resolve();
-		});
-	});
+	return browser.storage.sync.set(data);
 }
 
 export function getStorageItem<Key extends keyof Storage>(key: Key): Promise<Storage[Key]> {
-	return new Promise((resolve, reject) => {
-		chrome.storage.sync.get([key], result => {
-			if (chrome.runtime.lastError) {
-				return reject(chrome.runtime.lastError);
-			}
-
-			return resolve((result as Storage)[key]);
-		});
-	});
+	return browser.storage.sync.get([key]).then(res => res[key]);
 }
 
 export function setStorageItem<Key extends keyof Storage>(key: Key, value: Storage[Key]): Promise<void> {
-	return new Promise((resolve, reject) => {
-		chrome.storage.sync.set({ [key]: value }, () => {
-			if (chrome.runtime.lastError) {
-				return reject(chrome.runtime.lastError);
-			}
-
-			return resolve();
-		});
+	return browser.storage.sync.set({
+		[key]: value,
 	});
 }
 

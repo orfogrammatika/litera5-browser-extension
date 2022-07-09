@@ -1,23 +1,22 @@
-import InstalledDetails = chrome.runtime.InstalledDetails;
-import MessageSender = chrome.runtime.MessageSender;
+import browser from 'webextension-polyfill';
 
 export const Ext = {
 	openOptionsPage: () => {
-		chrome.runtime.openOptionsPage();
+		browser.runtime.openOptionsPage().then();
 	},
 	sendMessage: (msg: unknown) => {
-		chrome.runtime.sendMessage(msg);
+		browser.runtime.sendMessage(msg).then();
 	},
 	on: {
-		installed: (callback: (details: InstalledDetails) => void) => {
-			chrome.runtime.onInstalled.addListener(callback);
+		installed: (callback: (details: browser.Runtime.OnInstalledDetailsType) => void) => {
+			browser.runtime.onInstalled.addListener(callback);
 		},
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		message: (callback: (message: any, sender: MessageSender, sendResponse: (response?: any) => void) => void) => {
-			chrome.runtime.onMessage.addListener(callback);
+		message: (callback: (message: any, sender: browser.Runtime.MessageSender) => void) => {
+			browser.runtime.onMessage.addListener(callback);
 		},
 	},
-	id: () => chrome.runtime.id,
+	id: () => browser.runtime.id,
 };
 
 export const Msg = {
