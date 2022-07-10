@@ -46,6 +46,18 @@ export function findEditors(): HTMLElement[] {
 	return result;
 }
 
+export function isEditorTextarea(element: HTMLElement): boolean {
+	return 'textarea' === element.tagName.toLowerCase();
+}
+
+export function getEditorContentValue(element: HTMLElement, value: string): string {
+	if (isEditorTextarea(element)) {
+		return `<pre style="white-space: pre-wrap;">${value}</pre>`;
+	} else {
+		return value;
+	}
+}
+
 /**
  * Возвращает содержимое редактора для отправки на проверку
  * @param element элемент, содержимое которого необходимо добыть
@@ -53,8 +65,8 @@ export function findEditors(): HTMLElement[] {
 export function getEditorContent(element: HTMLElement): string {
 	log.debug('getEditorContent < element=', element);
 	let result = '';
-	if ('textarea' === element.tagName.toLowerCase()) {
-		result = `<pre style="white-space: pre-wrap;">${(element as HTMLTextAreaElement).value}</pre>`;
+	if (isEditorTextarea(element)) {
+		result = getEditorContentValue(element, (element as HTMLTextAreaElement).value);
 	} else if ('true' === element.getAttribute('contenteditable')?.toLowerCase()) {
 		result = element.innerHTML;
 	} else if (isEditorContainer(element as HTMLIFrameElement)) {
@@ -65,6 +77,32 @@ export function getEditorContent(element: HTMLElement): string {
 }
 
 /**
+ * Отвечает на вопрос, какого типа текст нужно копировать в буфер обмена для данного редактора
+ * @param element
+ */
+export function getEditorMime(element: HTMLElement): string {
+	if (isEditorTextarea(element)) {
+		return 'text/plain';
+	} else {
+		return 'text/html';
+	}
+}
+
+/**
+ * Преобразует полученное из iFrame содержимое в текст подходящий для вставки в выбранный тип редактора
+ */
+export function getEditorText(element: HTMLElement, content: string): string {
+	if (isEditorTextarea(element)) {
+		return content
+			.replace(/^<pre style="white-space: pre-wrap;">/, '')
+			.replace(/<\/pre>\s*$/, '')
+			.replace(/<br>/g, '\n');
+	} else {
+		return content;
+	}
+}
+
+/**
  * Устанавливает содержимое редактора в текстовое поле
  * @param element
  * @param content
@@ -72,10 +110,7 @@ export function getEditorContent(element: HTMLElement): string {
 export function setEditorContent(element: HTMLElement, content: string): void {
 	log.debug('setEditorContent < element=', element, 'content=', content);
 	if ('textarea' === element.tagName.toLowerCase()) {
-		(element as HTMLTextAreaElement).value = content
-			.replace(/^<pre style="white-space: pre-wrap;">/, '')
-			.replace(/<\/pre>\s*$/, '')
-			.replace(/<br>/g, '\n');
+		(element as HTMLTextAreaElement).value = getEditorText(element, content);
 	} else if ('true' === element.getAttribute('contenteditable')?.toLowerCase()) {
 		if (isCK5Editor(element)) {
 			setCK5Content(element, content);

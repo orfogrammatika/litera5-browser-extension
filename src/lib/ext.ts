@@ -23,3 +23,5 @@ export const Msg = {
 	setup: 'setup',
 	misconfigure: 'misconfigure',
 };
+
+export const gettext = browser.i18n.getMessage;

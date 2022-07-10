@@ -1,9 +1,10 @@
 {
-  "name": "Litera5",
-  "description": "Возможность проверять текст в любом редакторе текста!",
-  "author": "ООО Орфограмматика",
+  "name": "__MSG_extensionName__",
+  "description": "__MSG_extensionDescription__",
+  "author": "__MSG_extensionDescription__",
+  "default_locale": "ru",
   "homepage_url": "https://litera5.ru/browser-addon/",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "manifest_version": 2,
   "background": {
     "scripts": [
@@ -34,6 +35,7 @@
   ],
   "permissions": [
     "storage",
+    "clipboardWrite",
     "<all_urls>"
   ],
   "options_ui": {

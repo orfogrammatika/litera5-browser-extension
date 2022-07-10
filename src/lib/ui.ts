@@ -22,7 +22,7 @@ export const Ui = {
 			}
 		},
 	},
-	on: (elm?: HTMLElement | Document | null) => {
+	on: (elm?: HTMLElement | Element | Document | null) => {
 		const res = {
 			custom: (event: string, handler: EventListenerOrEventListenerObject) => {
 				elm?.addEventListener(event, handler);
@@ -34,7 +34,7 @@ export const Ui = {
 		};
 		return res;
 	},
-	off: (elm?: HTMLElement | Document | null) => {
+	off: (elm?: HTMLElement | Element | Document | null) => {
 		const res = {
 			custom: (event: string, handler: EventListenerOrEventListenerObject) => {
 				elm?.removeEventListener(event, handler);
