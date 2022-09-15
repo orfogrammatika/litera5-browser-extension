@@ -3,7 +3,7 @@ import { findIndex, isEqual, isFunction, isNil } from 'lodash';
 
 import '../styles/contentSpellcheck.scss';
 import { parseCompany, parseLogin } from './lib/api';
-import { getConfig, isConfigured } from './lib/Config';
+import { getConfig, getState, isConfigured } from './lib/Config';
 import {
 	findEditors,
 	getEditorContent,
@@ -13,10 +13,10 @@ import {
 	isEditorTextarea,
 	setEditorContent,
 } from './lib/editor';
-import { Ext, Msg, gettext } from './lib/ext';
+import { Ext, gettext, Msg } from './lib/ext';
 import { Logger } from './lib/logger';
 import { popupAlert, popupConfirm, showDialog } from './lib/popup';
-import { Config } from './lib/storage';
+import { Config, State } from './lib/storage';
 import { Ui } from './lib/ui';
 import { Svg } from './svg';
 
@@ -135,32 +135,32 @@ class L5ButtonHandler {
 				if ('granted' === perm.state || 'prompt' === perm.state) {
 					const confirmed = await popupConfirm(
 						gettext('contentSpellcheck__testEditorContent__confirmCopyClipboardOnInsertError__title'),
-						gettext('contentSpellcheck__testEditorContent__confirmCopyClipboardOnInsertError__message')
+						gettext('contentSpellcheck__testEditorContent__confirmCopyClipboardOnInsertError__message'),
 					);
 					if (confirmed) {
 						this.copyToClipboard()
 							.then(async () => {
 								await popupAlert(
 									gettext('contentSpellcheck__testEditorContent__alertClipboardCopySuccess__title'),
-									gettext('contentSpellcheck__testEditorContent__alertClipboardCopySuccess__message')
+									gettext('contentSpellcheck__testEditorContent__alertClipboardCopySuccess__message'),
 								);
 							})
 							.catch(async () => {
 								await popupAlert(
 									gettext('contentSpellcheck__testEditorContent__alertClipboardCopyError__title'),
-									gettext('contentSpellcheck__testEditorContent__alertClipboardCopyError__message')
+									gettext('contentSpellcheck__testEditorContent__alertClipboardCopyError__message'),
 								);
 							});
 					} else {
 						await popupAlert(
 							gettext('contentSpellcheck__testEditorContent__alertUserRejectedCopy__title'),
-							gettext('contentSpellcheck__testEditorContent__alertUserRejectedCopy__message')
+							gettext('contentSpellcheck__testEditorContent__alertUserRejectedCopy__message'),
 						);
 					}
 				} else {
 					await popupAlert(
 						gettext('contentSpellcheck__testEditorContent__alertClipboardAccessDenied__title'),
-						gettext('contentSpellcheck__testEditorContent__alertClipboardAccessDenied__message')
+						gettext('contentSpellcheck__testEditorContent__alertClipboardAccessDenied__message'),
 					);
 				}
 			}
@@ -204,11 +204,11 @@ class L5ButtonHandler {
 
 	showResults = async () => {
 		const footer = `<button class="l5-plugin-dialog__button l5-plugin-dialog__button--default l5-plugin-dialog__button--clip">${gettext(
-			'contentSpellcheck__showResults__clipButton__caption'
+			'contentSpellcheck__showResults__clipButton__caption',
 		)}</button>
 			<button class="l5-plugin-dialog__button l5-plugin-dialog__button--primary l5-plugin-dialog__button--recheck">${gettext(
-				'contentSpellcheck__showResults__recheckButton__caption'
-			)}</button>`;
+			'contentSpellcheck__showResults__recheckButton__caption',
+		)}</button>`;
 		const body = isEditorTextarea(this.$element)
 			? `<textarea readonly class="l5-plugin-dialog__results">${this.text}</textarea>`
 			: `<div class="l5-plugin-dialog__results">${this.text}</div>`;
@@ -236,14 +236,14 @@ class L5ButtonHandler {
 					closeDialog();
 					popupAlert(
 						gettext('contentSpellcheck__showResults__alertCopySuccess__title'),
-						gettext('contentSpellcheck__showResults__alertCopySuccess__message')
+						gettext('contentSpellcheck__showResults__alertCopySuccess__message'),
 					);
 				})
 				.catch(() => {
 					window.alert(
 						`${gettext('contentSpellcheck__showResults__alertCopyError__title')}. ${gettext(
-							'contentSpellcheck__showResults__alertCopyError__message'
-						)}`
+							'contentSpellcheck__showResults__alertCopyError__message',
+						)}`,
 					);
 				});
 		});
@@ -261,7 +261,8 @@ class L5ButtonHandler {
 		const html = getEditorContent(this.$element);
 		log.debug('check html:', html);
 		const cfg = await getConfig();
-		if (isConfigured(cfg)) {
+		const state = await getState();
+		if (isConfigured(cfg, state)) {
 			const api = createApi({
 				company: parseCompany(cfg.login),
 				userApiPassword: cfg.password,
@@ -282,19 +283,19 @@ class L5ButtonHandler {
 						setTimeout(deinstrumentEditors, 1000);
 						popupAlert(
 							gettext('contentSpellcheck__checkText__apiErrorUnauthenticated__title'),
-							gettext('contentSpellcheck__checkText__apiErrorUnauthenticated__message')
+							gettext('contentSpellcheck__checkText__apiErrorUnauthenticated__message'),
 						);
 					} else {
 						const text = isFunction(err.text) ? err.text() : err;
 						if (!isNil(text)) {
 							popupAlert(
 								gettext('contentSpellcheck__checkText__apiErrorDetailed__title'),
-								gettext('contentSpellcheck__checkText__apiErrorDetailed__message', [text])
+								gettext('contentSpellcheck__checkText__apiErrorDetailed__message', [text]),
 							);
 						} else {
 							popupAlert(
 								gettext('contentSpellcheck__checkText__apiErrorGeneric__title'),
-								gettext('contentSpellcheck__checkText__apiErrorGeneric__message')
+								gettext('contentSpellcheck__checkText__apiErrorGeneric__message'),
 							);
 						}
 					}
@@ -363,17 +364,20 @@ function instrumentEditor(element: HTMLElement): void {
 	}
 }
 
-function allowCheck(cfg: Config): boolean {
+function allowCheck(cfg: Config, state: State): boolean {
 	const href = window.location.href.toLowerCase();
 	const host = window.location.host;
-	return !(href.startsWith(cfg.server) || host.match(/orfogrammka/) || host.match(/litera5/));
+	return !(href.startsWith(cfg.server) || host.match(/orfogrammka/) || host.match(/litera5/)) && !state.isPaused;
 }
 
 async function instrumentEditors() {
 	const cfg = await getConfig();
-	if (isConfigured(cfg) && allowCheck(cfg)) {
+	const state = await getState();
+	if (isConfigured(cfg, state) && allowCheck(cfg, state)) {
 		const editors = findEditors();
 		editors.forEach(instrumentEditor);
+	} else {
+		deinstrumentEditors();
 	}
 }
 

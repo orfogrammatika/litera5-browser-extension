@@ -1,6 +1,6 @@
 {
   "name": "litera5-browser-plugin",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Плагин для браузера системы корпоративной проверки правописания Литера5",
   "scripts": {
     "start": "webpack --watch --config webpack.dev.js",
@@ -8,7 +8,6 @@
     "lint": "eslint --ext .ts,.js --max-warnings=0 .",
     "prettier": "prettier --write",
     "clean": "rimraf ./dist",
-    "prepare": "husky install",
     "test:watch": "jest --watch",
     "test": "jest --coverage --passWithNoTests",
     "typecheck": "tsc --noEmit"
@@ -55,7 +54,6 @@
     "eslint": "^8.5.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-webpack-plugin": "^3.1.1",
-    "husky": "^7.0.4",
     "jest": "^28.1.1",
     "lint-staged": "^12.1.4",
     "mini-css-extract-plugin": "^2.4.5",
@@ -76,16 +74,5 @@
     "normalize.css": "^8.0.1",
     "webextension-polyfill": "^0.9.0"
   },
-  "browserslist": "> 0.25%, not dead",
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "lint-staged": {
-    "*.{ts,js}": [
-      "npm run prettier",
-      "npm run lint"
-    ]
-  }
+  "browserslist": "> 0.25%, not dead"
 }

@@ -3,8 +3,8 @@ import { createApi } from '../../litera5-api-js-client';
 import { parseCompany, parseLogin } from './lib/api';
 import { Logger } from './lib/logger';
 import '../styles/options.scss';
-import { getAutoConfig, getConfig, isConfigured, setAutoConfig, setConfig } from './lib/Config';
-import { Config, State } from './lib/storage';
+import { getAutoConfig, getConfig, getState, isConfigured, setAutoConfig, setConfig, updateState } from './lib/Config';
+import { AutoConfig, Config, State } from './lib/storage';
 import { Ui } from './lib/ui';
 
 const log = Logger.get('L5 Options');
@@ -38,6 +38,12 @@ async function setup() {
 			configured: document.getElementById('status__configured'),
 			misconfigured: document.getElementById('status__misconfigured'),
 		},
+	};
+
+	const state = {
+		config: await getConfig(),
+		state: await getState(),
+		autoconfig: await getAutoConfig(),
 	};
 
 	function successMessage() {
@@ -83,21 +89,22 @@ async function setup() {
 		progressMessageShow();
 		const goodCfg = await testConfig(cfg);
 		if (goodCfg) {
-			await setConfig({
-				...cfg,
-				state: State.active,
-			});
+			await setConfig(cfg);
+			await updateState(state => ({
+				...state,
+				isConfigured: true,
+			}));
 			successMessage();
 		} else {
 			failMessage();
 		}
 		progressMessageHide();
+		invalidate();
 	}
 
 	async function onSaveClick() {
 		Ui.hide($.status.container);
 		const newCfg = {
-			state: State.active,
 			server: $.input.server.value,
 			login: $.input.login.value,
 			password: $.input.password.value,
@@ -105,13 +112,15 @@ async function setup() {
 		await saveConfig(newCfg);
 	}
 
-	async function loadConfig() {
-		const cfg = await getConfig();
+	function invalidateConfig(cfg: Config) {
 		$.input.server.value = cfg.server;
 		$.input.login.value = cfg.login;
 		$.input.password.value = cfg.password;
 		Ui.on($.btn.save).click(onSaveClick);
-		if (isConfigured(cfg)) {
+	}
+
+	function invalidateState(cfg: Config, state: State) {
+		if (isConfigured(cfg, state)) {
 			Ui.show($.status.configured);
 			Ui.hide($.status.misconfigured);
 		} else {
@@ -120,15 +129,35 @@ async function setup() {
 		}
 	}
 
-	await loadConfig();
+	function invalidateAutoConfig(auto?: AutoConfig) {
+		if (!isNil(auto)) {
+			Ui.innerText.set($.auto.origin, auto.origin);
+			Ui.innerText.set($.auto.server, auto.server);
+			Ui.innerText.set($.auto.login, auto.login);
+			Ui.innerText.set($.auto.password, auto.password);
+			Ui.show($.auto.block);
+			Ui.hide($.status.container);
+			Ui.on($.auto.apply).click(onApply);
+			Ui.on($.auto.cancel).click(onCancel);
+		} else {
+			Ui.show($.status.container);
+		}
+	}
 
-	const auto = await getAutoConfig();
+	async function invalidate() {
+		state.config = await getConfig();
+		state.state = await getState();
+		state.autoconfig = await getAutoConfig();
+		invalidateConfig(state.config);
+		invalidateState(state.config, state.state);
+		invalidateAutoConfig(state.autoconfig);
+	}
 
 	async function closeAutoConfig() {
 		Ui.hide($.auto.block);
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 		await setAutoConfig(null!);
-		await loadConfig();
+		await invalidate();
 	}
 
 	async function onCancel() {
@@ -137,24 +166,15 @@ async function setup() {
 	}
 
 	async function onApply() {
-		if (!isNil(auto)) {
-			await saveConfig(auto);
+		if (!isNil(state.autoconfig)) {
+			await saveConfig(state.autoconfig);
 			await closeAutoConfig();
 		}
 	}
 
-	if (!isNil(auto)) {
-		Ui.innerText.set($.auto.origin, auto.origin);
-		Ui.innerText.set($.auto.server, auto.server);
-		Ui.innerText.set($.auto.login, auto.login);
-		Ui.innerText.set($.auto.password, auto.password);
-		Ui.show($.auto.block);
-		Ui.hide($.status.container);
-		Ui.on($.auto.apply).click(onApply);
-		Ui.on($.auto.cancel).click(onCancel);
-	} else {
-		Ui.show($.status.container);
-	}
+	await invalidate();
+
+	setInterval(invalidate, 2000);
 }
 
 setup().then(() => {

@@ -5,9 +5,11 @@
   "default_locale": "ru",
   "homepage_url": "https://litera5.ru/browser-addon/",
   "version": "0.1.6",
-  "manifest_version": 3,
+  "manifest_version": 2,
   "background": {
-    "service_worker": "serviceWorker.js"
+    "scripts": [
+      "serviceWorker.js"
+    ]
   },
   "content_scripts": [
     {
@@ -33,16 +35,14 @@
   ],
   "permissions": [
     "storage",
-    "clipboardWrite"
-  ],
-  "host_permissions": [
+    "clipboardWrite",
     "<all_urls>"
   ],
   "options_ui": {
     "page": "options.html",
     "open_in_tab": true
   },
-  "action": {
+  "browser_action": {
     "default_title": "Litera5",
     "default_popup": "popup.html",
     "default_icon": {

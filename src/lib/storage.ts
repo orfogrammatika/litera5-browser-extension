@@ -1,15 +1,14 @@
 import browser from 'webextension-polyfill';
 
-export enum State {
-	misconfigured = 'misconfigured',
-	active = 'active',
+export interface State {
+	isConfigured: boolean;
+	isPaused: boolean;
 }
 
 export interface Config {
 	server: string;
 	login: string;
 	password: string;
-	state: State;
 }
 
 export interface AutoConfig extends Config {
@@ -18,6 +17,7 @@ export interface AutoConfig extends Config {
 
 // Define your storage data here
 export interface Storage {
+	state: State;
 	config: Config;
 	autoconfig?: AutoConfig;
 }
