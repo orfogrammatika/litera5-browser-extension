@@ -1,8 +1,8 @@
 .PHONY: all clean v2 v3 ver
 
 VER := $(shell ./get_version.sh)
-V2_NAME := "litera5-browser-$(VER).v2"
-V3_NAME := "litera5-browser-$(VER).v3"
+V2_NAME := litera5-browser-$(VER).m2
+V3_NAME := litera5-browser-$(VER).m3
 
 all: v2 v3
 
