@@ -153,6 +153,13 @@ async function setup() {
 		invalidateAutoConfig(state.autoconfig);
 	}
 
+	async function invalidateAuto() {
+		state.state = await getState();
+		state.autoconfig = await getAutoConfig();
+		invalidateState(state.config, state.state);
+		invalidateAutoConfig(state.autoconfig);
+	}
+
 	async function closeAutoConfig() {
 		Ui.hide($.auto.block);
 		// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -174,7 +181,7 @@ async function setup() {
 
 	await invalidate();
 
-	setInterval(invalidate, 2000);
+	setInterval(invalidateAuto, 2000);
 }
 
 setup().then(() => {

@@ -5,7 +5,7 @@ import { Ui } from './lib/ui';
 const log = Logger.get('L5 Autoconfig');
 
 function onPing() {
-	document.dispatchEvent(new CustomEvent('litera5-plugin-pong'));
+	document.dispatchEvent(new CustomEvent('litera5-extension-pong'));
 }
 
 function onSetup(event: Event) {
@@ -19,7 +19,7 @@ function onSetup(event: Event) {
 	});
 }
 
-Ui.on(document).custom('litera5-plugin-ping', onPing).custom('litera5-plugin-setup', onSetup);
-document.dispatchEvent(new CustomEvent('litera5-plugin-pong'));
+Ui.on(document).custom('litera5-extension-ping', onPing).custom('litera5-extension-setup', onSetup);
+document.dispatchEvent(new CustomEvent('litera5-extension-pong'));
 
 log.info('Модуль автоматической настройки плагина загружен.');
